@@ -33,6 +33,8 @@ MongoClient.connect('mongodb://127.0.0.1:27017/ToDos', { useNewUrlParser: true }
             (err) => {
                 console.log('unable to find', err)
             });
+
+            response.close()
     });
 
 // count the objects in document
@@ -65,16 +67,14 @@ MongoClient.connect('mongodb://127.0.0.1:27017/ToDos', { useNewUrlParser: true }
 MongoClient.connect('mongodb://127.0.0.1:27017/ToDos', { useNewUrlParser: true },
     (error, response) => {
         if (error) {
-            console.log('unable to connect mongo db server');
-        }
+            console.log('unable to connect mongo db server');}
         console.log('connected to server ')
         var db = response.db('ToDos');
 
         db.collection('USER').find({
             $or: [
                 { Name: 'PRANI BHAI' }, { Age: 31 }
-            ]
-        }
+            ]}
         ).toArray().then((docs) => {
             console.log('USER Query \n\n'),
                 console.log(JSON.stringify(docs, undefined, 2))
