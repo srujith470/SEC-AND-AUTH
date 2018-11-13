@@ -1,7 +1,5 @@
 var mongoose = require('mongoose');
 
-module.exports = {ToDo};
-
 var TODO = mongoose.model('TODO', {
     task:{
         type: String,
@@ -10,8 +8,7 @@ var TODO = mongoose.model('TODO', {
 
     },
     status:{
-        type: String,
-        required:true
+        type: String
     },
     completed:{
         type: Boolean,
@@ -21,3 +18,6 @@ var TODO = mongoose.model('TODO', {
         type: Number,
     }
 }); // DATA MODEL INTERFACE CONSTRUICTOR FOR TODO
+
+module.exports = {TODO};
+
