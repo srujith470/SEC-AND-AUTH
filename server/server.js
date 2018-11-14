@@ -30,14 +30,37 @@ app.post('/todos', (req, res) => {
         res.status(400).send(e);
     });
 });
-
 app.get('/todos', (req,res) => {
     TODO.find().then((todos) => {
         res.send({todos});
+        console.log(req.body)
     })
 }, (e) => {
     res.status(400).send(e);
 });
+
+app.post('/users', (req, res) => {
+    // console.log(req.body);
+    var user = new User({
+        Email: req.body.Email,
+    });
+    user.save().then((docs) => {
+        res.send(docs);
+    }, (e) => {
+        res.status(400).send(e);
+    });
+});
+app.get('/users', (req,res) => {
+    User.find().then((todos) => {
+        res.send({todos});
+        console.log(req.body)
+    })
+}, (e) => {
+    res.status(400).send(e);
+});
+
+
+
 
 app.listen(3000, () => {
     console.log('starting port 3000')
