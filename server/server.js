@@ -1,19 +1,20 @@
 var express = require('express');
 var bodyparser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
-var {mongoose} = require('./DB/mongoose');
-var {TODO} = require('./models/Todomodel');
-var {User} = require('./models/Usermodel');
+var { mongoose } = require('./DB/mongoose');
+var { TODO } = require('./models/Todomodel');
+var { User } = require('./models/Usermodel');
 
 mongoose.Promise = global.Promise
 
 var app = express();
 
- app.use(bodyparser.urlencoded ({extended: true})); 
- // parse application/x-www-form-urlencoded
+app.use(bodyparser.urlencoded({ extended: true }));
+// parse application/x-www-form-urlencoded
 
- app.use(bodyparser.json());
- // parse application/json
+app.use(bodyparser.json());
+// parse application/json
 
 
 app.post('/todos', (req, res) => {
@@ -30,9 +31,9 @@ app.post('/todos', (req, res) => {
         res.status(400).send(e);
     });
 });
-app.get('/todos', (req,res) => {
+app.get('/todos', (req, res) => {
     TODO.find().then((todos) => {
-        res.send({todos});
+        res.send({ todos });
         console.log(req.body)
     })
 }, (e) => {
@@ -50,23 +51,38 @@ app.post('/users', (req, res) => {
         res.status(400).send(e);
     });
 });
-app.get('/users', (req,res) => {
+app.get('/users', (req, res) => {
     User.find().then((todos) => {
-        res.send({todos});
+        res.send({ todos });
         console.log(req.body)
     })
 }, (e) => {
     res.status(400).send(e);
 });
 
+app.get('/todos/:id', (req,res) => {
+    //res.send(req.params); // this statement tracks and prints id of URL in POSTMAN
+    var id = req.params.id; // this is id as dynamic parameter which give in url of POSTMAN
 
-
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send()
+    }
+    TODO.findById(id).then((todo) => {
+        if(!todo){
+            return res.status(404).send()
+       }
+            res.send({todo:todo})
+    }).catch((e) => {
+        res.status(400).send()
+    });
+});
+ 
 
 app.listen(3000, () => {
     console.log('starting port 3000')
 });
 
-module.exports = {app}
+module.exports = { app }
 
 
 
