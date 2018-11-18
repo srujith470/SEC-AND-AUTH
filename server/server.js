@@ -1,6 +1,8 @@
 var express = require('express');
 var bodyparser = require('body-parser');
 const {ObjectID} = require('mongodb');
+const _L = require('lodash');
+
 
 var { mongoose } = require('./DB/mongoose');
 mongoose.set('useFindAndModify', false);  //DEPRECATION WARNING
@@ -96,6 +98,27 @@ app.delete('/todos/:id', (req, res) => {
         res.status(404).send();
     });    
 }); //DELET A DOC
+
+app.patch('/todos/:id', (req,res) => {
+    var id = req.params.id;
+    var body = _L.pick(req.body,['task','status','completed','timestamp']);
+
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send()
+    };
+
+    if(_L.isBoolean(body.completed) && body.completed){
+        body.timestamp= new Date().getTime()
+    } else{
+        body.completed = false;
+        body.timestamp = null;  
+    }
+    TODO.findByIdAndUpdate(id, {$set: body}, {new:true}).then(todo =>  {
+        res.send({todo})
+    }).catch((e) => {
+        res.status(404).send()
+    })
+});
 
 app.listen(port, () => {
     console.log(`starting port ${port}`)

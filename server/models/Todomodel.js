@@ -16,6 +16,7 @@ var TODO = mongoose.model('TODO', {
     },
     timestamp:{
         type: Number,
+        default: null
     }
 }); // DATA MODEL INTERFACE CONSTRUICTOR FOR TODO
 
