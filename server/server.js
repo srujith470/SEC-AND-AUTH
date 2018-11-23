@@ -46,17 +46,19 @@ app.get('/todos', (req, res) => {
     res.status(400).send(e);
 });
 
-app.post('/users', (req, res) => {
-    // console.log(req.body);
-    var user = new User({
-        Email: req.body.Email,
-    });
-    user.save().then((docs) => {
-        res.send(docs);
-    }, (e) => {
-        res.status(400).send(e);
-    });
-});
+// app.post('/users', (req, res) => {
+//     // console.log(req.body);
+//     var user = new User({
+//         Email: req.body.Email,
+//     });
+//     user.save().then((docs) => {
+//         res.send(docs);
+//     }, (e) => {
+//         res.status(400).send(e);
+//     });
+// }); 
+// above comment is remove old post user and add new one for authencitation
+
 app.get('/users', (req, res) => {
     User.find().then((todos) => {
         res.send({ todos });
@@ -119,6 +121,22 @@ app.patch('/todos/:id', (req,res) => {
         res.status(404).send()
     })
 });
+
+app.post('/users', (req, res) => {
+    // console.log(req.body);
+    var body = _L.pick(req.body, ['Email', 'password']);
+    var user = new User(body)
+
+    user.save().then((user) => {
+    return user.generateAuthToken();
+       // res.send(user);
+    }).then((token) => {
+        res.header('x-auth', token).send(user);
+    }).catch((e) => {
+        res.status(400).send(e)
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`starting port ${port}`)
