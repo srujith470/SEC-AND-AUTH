@@ -9,7 +9,7 @@ mongoose.set('useFindAndModify', false);  //DEPRECATION WARNING
 
 var { TODO } = require('./models/Todomodel');
 var { User } = require('./models/Usermodel');
-
+var {authencitate} = require('./middleware/auth');
 const port = process.env.PORT || 3000;
 
 mongoose.Promise = global.Promise
@@ -137,21 +137,14 @@ app.post('/users', (req, res) => {
     });
 });
 
-app.get('/users/me', (req, res) => {
-    var token = req.header('x-auth');
-    User.findByToken(token).then((user) => {
-        if(!user){
-        return Promise.reject();
-        }
-        res.send(user);
-    }).catch((e) => {
-        res.send(401).send();
-    });
+app.get('/users/me',authencitate, (req, res) => {
+    res.send(req.user)
 }); //private route
 
 
+
 app.listen(port, () => {
-    console.log(`starting port ${port}`)
+    console.log(`starting port ${port}`);
 });
 
 module.exports = { app }
