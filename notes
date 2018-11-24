@@ -1,0 +1,3 @@
+ node server/server.js
+ git commit -m SEC-AND-AUTH
+ git push -u SEC-AND-AUTH

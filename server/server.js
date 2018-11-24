@@ -137,6 +137,18 @@ app.post('/users', (req, res) => {
     });
 });
 
+app.get('/users/me', (req, res) => {
+    var token = req.header('x-auth');
+    User.findByToken(token).then((user) => {
+        if(!user){
+        return Promise.reject();
+        }
+        res.send(user);
+    }).catch((e) => {
+        res.send(401).send();
+    });
+}); //private route
+
 
 app.listen(port, () => {
     console.log(`starting port ${port}`)
