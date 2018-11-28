@@ -139,7 +139,7 @@ app.post('/users', (req, res) => {
 
 app.get('/users/me',authencitate, (req, res) => {
     res.send(req.user)
-}); //private route
+}); //private route signup
 
 app.post('/users/login', (req,res) => {
     var body = _L.pick(req.body, ['Email', 'password']);
@@ -148,6 +148,14 @@ app.post('/users/login', (req,res) => {
     User.findByCredentials(body.Email, body.password).then((user) => {
         res.send(user);
     }).catch((e) => {
+        res.status(400).send();
+    });
+});
+
+app.delete('/users/me/token', authencitate, (req, res) => {
+    req.user.removeToken(req.token).then(() => {
+        res.status(200).send();
+    }, () => {
         res.status(400).send();
     });
 });
