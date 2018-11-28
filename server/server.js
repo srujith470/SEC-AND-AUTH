@@ -135,13 +135,22 @@ app.post('/users', (req, res) => {
     }).catch((e) => {
         res.status(400).send(e)
     });
-});
+}); // generate auth token and create user header
 
 app.get('/users/me',authencitate, (req, res) => {
     res.send(req.user)
 }); //private route
 
+app.post('/users/login', (req,res) => {
+    var body = _L.pick(req.body, ['Email', 'password']);
+    //res.send(body);//this gives Emailid and pwd in POSTMAN
 
+    User.findByCredentials(body.Email, body.password).then((user) => {
+        res.send(user);
+    }).catch((e) => {
+        res.status(400).send();
+    });
+});
 
 app.listen(port, () => {
     console.log(`starting port ${port}`);

@@ -86,7 +86,27 @@ UserSchema.pre('save', function(next) {
     }else{
         next();
     }
-});
+}); // this is to hash password before we save
+
+UserSchema.statics.findByCredentials = function(Email, password) {
+    var User = this;
+    return User.findOne({Email}).then((user) => {
+        if(!user) {
+            return new Promise.reject();
+        }
+        return new Promise((resolve, reject) => {
+            bcryptjs.compare(password, user.password, (err, res) => {
+                if(res){
+                    resolve(user)
+                } else {
+                    reject();
+                }
+            });
+        });
+    })
+};
+
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports = { User }

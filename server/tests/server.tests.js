@@ -4,38 +4,18 @@ const supertest = require('supertest');
 
 const { ObjectID } = require('mongodb');
 
-
+const { temptodo, tempusers, populateTodos, populateUsers } = require('../seed/seedDB');
 const { app } = require('../server');
 const { TODO } = require('../models/Todomodel');
+const { User } = require('../models/Usermodel');
 
-const temptodo = [
-    {
-        _id: new ObjectID(),
-        task: 'GET TEST TEMP TASK',
-        completed: false,
-        timestamp: 123456,
-        status: 'KNOWN'
-    },
-    {
-        _id: new ObjectID(),
-        task: 'GET TEST TEMP TASK2',
-        completed: true,
-        timestamp: 123456,
-        status: 'GET SET GO'
-    }
-]
+
 
 // beforeEach((done) => {
 //     TODO.remove({}).then(() => done());
 // }); // THIS COMMAND CLEANS TODOS COLLECTION BEFORE EACH EXECUTION
-
-beforeEach((done) => {
-    TODO.remove({}).then(() => {
-        return TODO.insertMany(temptodo);
-    }).then(() => {
-        done();
-    })
-}); // THIS COMMAND CLEANS TODOS COLLECTION BEFORE EACH EXECUTION AND ADDS TEMPERORY TODOS
+beforeEach(populateUsers);
+beforeEach(populateTodos); // THIS COMMAND CLEANS TODOS COLLECTION BEFORE EACH EXECUTION AND ADDS TEMPERORY TODOS
 
 
 
@@ -162,3 +142,119 @@ describe('PATCH /todos/:id', () => {
             .end(done);
     });
 });
+
+describe('GET/users/me', () => {
+    it('it should user if auth', (done) => {
+        supertest(app).get('/users/me').set('x-auth', tempusers[0].tokens[0].token)
+            .expect(200).expect((res) => {
+                expect(res.body._id).toBe(tempusers[0]._id.toHexString());
+                expect(res.body.Email).toBe(tempusers[0].Email);
+            }).end(done)
+    });
+
+    it('sould return 401 if auth fail', (done) => {
+        supertest(app).get('/users/me').expect(401).expect((res) => {
+            expect(res.body).toEqual({});
+        }).end(done)
+    })
+});
+
+describe('POST/users', () => {
+    it('should create a user', (done) => {
+        var Email = 'example@example.com';
+        var password = '123mnb!';
+
+        supertest(app)
+            .post('/users')
+            .send({ Email, password })
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toBeTruthy();
+                expect(res.body._id).toBeTruthy();
+                expect(res.body.Email).toBe(Email);
+        }).end((err) => {
+            if (err) {
+                return done(err);
+            }
+            User.findOne({ Email }).then((user) => {
+                    expect(user).toBeTruthy();
+                    expect(user.password).not.toBe(password);
+                    done();
+            });
+            })
+    });
+    
+    it('should return validation errors if request is invalid', (done) => {
+        supertest(app)
+        .post('/users')
+        .send({
+          Email: 'and',
+          password: '123'
+        })
+        .expect(400)
+        .end(done);
+    });
+
+    it('should not create email if email is in use', (done) => {
+       supertest(app)
+      .post('/users')
+      .send({
+        Email: tempusers[0].Email,
+        password: 'Password123!'
+      })
+      .expect(400)
+      .end(done);
+    });
+});
+
+describe('POST /users/login', () => {
+    it('should login user and return auth token', (done) => {
+      supertest(app)
+        .post('/users/login')
+        .send({
+          Email: tempusers[1].Email,
+          password: tempusers[1].password
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.headers['x-auth']).toBeTruthy();
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+  
+          User.findById(tempusers[1]._id).then((user) => {
+            expect(user.tokens[0]).toContain({
+              access: 'auth',
+              token: res.headers['x-auth']
+            });
+            done();
+          }).catch((e) => done(e));
+        });
+    });
+  
+    it('should reject invalid login', (done) => {
+      supertest(app)
+        .post('/users/login')
+        .send({
+          email: tempusers[1].Email,
+          password: tempusers[1].password + '1'
+        })
+        .expect(400)
+        .expect((res) => {
+          expect(res.headers['x-auth']).toBeFalsy();
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+  
+          User.findById(tempusers[1]._id).then((user) => {
+            expect(user.tokens.length).toBe(0);
+            done();
+          }).catch((e) => done(e));
+        });
+    });
+  });
+  
