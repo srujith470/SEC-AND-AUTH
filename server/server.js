@@ -23,13 +23,15 @@ app.use(bodyparser.json());
 // parse application/json
 
 
-app.post('/todos', (req, res) => {
+app.post('/todos',authencitate, (req, res) => {
 
     // console.log(req.body);
 
     var todo = new TODO({
         task: req.body.task,
-        status: req.body.status
+        status: req.body.status,
+        _creator: req.user._id
+
     });
     todo.save().then((docs) => {
         res.send(docs);
@@ -37,30 +39,10 @@ app.post('/todos', (req, res) => {
         res.status(400).send(e);
     });
 });
-app.get('/todos', (req, res) => {
-    TODO.find().then((todos) => {
-        res.send({ todos });
-        console.log(req.body)
-    })
-}, (e) => {
-    res.status(400).send(e);
-});
-
-// app.post('/users', (req, res) => {
-//     // console.log(req.body);
-//     var user = new User({
-//         Email: req.body.Email,
-//     });
-//     user.save().then((docs) => {
-//         res.send(docs);
-//     }, (e) => {
-//         res.status(400).send(e);
-//     });
-// }); 
-// above comment is remove old post user and add new one for authencitation
-
-app.get('/users', (req, res) => {
-    User.find().then((todos) => {
+app.get('/todos', authencitate, (req, res) => {
+    TODO.find({
+        _creator:req.user._id
+    }).then((todos) => {
         res.send({ todos });
         console.log(req.body)
     })
@@ -121,6 +103,30 @@ app.patch('/todos/:id', (req,res) => {
         res.status(404).send()
     })
 });
+
+
+// app.post('/users', (req, res) => {
+//     // console.log(req.body);
+//     var user = new User({
+//         Email: req.body.Email,
+//     });
+//     user.save().then((docs) => {
+//         res.send(docs);
+//     }, (e) => {
+//         res.status(400).send(e);
+//     });
+// }); 
+// above comment is remove old post user and add new one for authencitation
+
+app.get('/users', (req, res) => {
+    User.find().then((todos) => {
+        res.send({ todos });
+        console.log(req.body)
+    })
+}, (e) => {
+    res.status(400).send(e);
+});
+
 
 app.post('/users', (req, res) => {
     // console.log(req.body);

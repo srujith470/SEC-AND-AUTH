@@ -10,6 +10,7 @@ const tempusers =[{
     _id: userid1,
     Email:'adf@asd.com',
     password:'onepass123',
+    _creator: userid1,
     tokens:[{
         access: 'auth',
         token: jwt.sign({_id: userid1, access: 'auth'}, 'abc123').toString()
@@ -17,7 +18,8 @@ const tempusers =[{
 },{
     _id:userid2,
     Email:'asdfgws@gmail.com',
-    password: 'twopass321'
+    password: 'twopass321',
+    _creator: userid2
 }]
 
 const temptodo = [

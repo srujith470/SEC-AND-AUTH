@@ -23,7 +23,9 @@ describe('POST /todos', () => {
     it('should create new todo', (done) => {
         var task = 'Test todo task';
 
-        supertest(app).post('/todos').send({ task }).expect(200).expect((res) => {
+        supertest(app).post('/todos')
+        .set('x-auth', tempusers[0].tokens[0].token)
+        .send({ task }).expect(200).expect((res) => {
             expect(res.body.task).toBe(task);
         }).end((err, res) => {
             if (err) {
@@ -42,7 +44,9 @@ describe('POST /todos', () => {
     it('should not create new todo with invalid data', (done) => {
         var task = 'Test todo task';
 
-        supertest(app).post('/todos').send().expect(200).end((err, res) => {
+        supertest(app).post('/todos')
+        .set('x-auth', tempusers[0].tokens[0].token)
+        .send().expect(200).end((err, res) => {
             if (err) {
                 return done(err);
             }
@@ -59,8 +63,10 @@ describe('POST /todos', () => {
 
 describe('GET /todos', () => {
     it('should get all todos', (done) => {
-        supertest(app).get('/todos').expect(200).expect((res) => {
-            expect(res.body.todos.length).toBe(2);
+        supertest(app).get('/todos')
+        .set('x-auth', tempusers[0].tokens[0].token)
+        .expect(200).expect((res) => {
+            expect(res.body.todos.length).toBe(0);
         }).end(done);
     });
 });
@@ -68,6 +74,7 @@ describe('GET /todos', () => {
 describe('GET/todos/:id', () => {
     it('should return todo doc refered to id', (done) => {
         supertest(app).get(`/todos/${temptodo[0]._id.toHexString()}`)
+        .set('x-auth', tempusers[0].tokens[0].token)
             .expect(200).expect((res) => {
                 expect(res.body.todo.task).toBe(temptodo[0].task);
             }).end(done)
